@@ -16,16 +16,13 @@ import java.time.OffsetDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Loan {
+public class LoanDefaulter {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column()
-    private Long debt = 0L;
-
-    @Column(name = "due_date", columnDefinition = "DATETIME")
-    private OffsetDateTime dueDate;
+    @Column
+    private Long debt;
 
     @Column(name = "created_date", columnDefinition = "DATETIME", nullable = false)
     @CreatedDate
@@ -36,6 +33,6 @@ public class Loan {
     private OffsetDateTime updatedDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_msisdn", columnDefinition = "VARCHAR", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 }

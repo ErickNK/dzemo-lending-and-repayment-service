@@ -44,6 +44,9 @@ public class User {
     @Column()
     private String password;
 
+    @Column(name = "loan_limit")
+    private Long loanLimit;
+
     @Column(name = "created_date", columnDefinition = "DATETIME", nullable = false)
     @CreatedDate
     private OffsetDateTime createdDate;
@@ -54,11 +57,16 @@ public class User {
 
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    private Set<Loan> loans = new HashSet<>();
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
+    private Loan loan;
 
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @ManyToMany(fetch = FetchType.EAGER)
     private Collection<Role> roles = new ArrayList<>();
+
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
+    private LoanDefaulter loanDefaulter;
 }
