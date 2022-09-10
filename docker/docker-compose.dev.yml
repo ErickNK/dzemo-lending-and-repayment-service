@@ -11,8 +11,8 @@ services:
     image: mysql:latest
     volumes:
       - "../data/db:/var/lib/mysql"
-    container_name: dzemo-demo-mysql
-    hostname: dzemo-demo-mysql
+    container_name: dzemo-demo-lending-and-repayment-mysql
+    hostname: dzemo-demo-lending-and-repayment-mysql
     ports:
       - "3306:3306"
     restart: always
@@ -25,8 +25,8 @@ services:
   ### SFTP #############################################
   sftp:
     image: atmoz/sftp
-    container_name: dzemo-demo-sftp
-    hostname: dzemo-demo-sftp
+    container_name: dzemo-demo-lending-and-repayment-sftp
+    hostname: dzemo-demo-lending-and-repayment-sftp
     ports:
       - "2222:22"
     networks:
