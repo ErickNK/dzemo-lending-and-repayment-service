@@ -43,7 +43,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests()
                 .antMatchers("/actuator/**", "/api/auth/populate-records").permitAll()
                 .antMatchers(POST, "/api/auth/login/**", "/api/auth/token/refresh").permitAll()
-                .antMatchers(POST, "/api/auth/register", "/api/auth/role", "/api/auth/user/role").hasAnyAuthority("ROLE_ADMIN")
+                .antMatchers(POST, "/api/auth/register", "/api/auth/role", "/api/auth/user/role", "/api/loans/data-dump").hasAnyAuthority("ROLE_ADMIN")
                 .antMatchers(POST, "/api/loans/request-loan", "/api/loans/pay-loan").hasAnyAuthority("ROLE_USER")
                 .anyRequest().authenticated();
 

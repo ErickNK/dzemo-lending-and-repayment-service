@@ -10,7 +10,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import javax.persistence.*;
 import java.time.OffsetDateTime;
 
-@Table(name = "loans")
+@Table(name = "loan_defaulters")
 @Entity()
 @EntityListeners({AuditingEntityListener.class})
 @Data

@@ -18,40 +18,19 @@ services:
     restart: always
     environment:
       - MYSQL_ROOT_PASSWORD=12345678
-      - MYSQL_DATABASE=elevator_manager
-      - MYSQL_USER=elevator_manager
+      - MYSQL_DATABASE=lending_and_repayment
+      - MYSQL_USER=lending_and_repayment
       - MYSQL_PASSWORD=12345678
 
-  ### Redis #############################################
-  redis:
-    build: ./redis
-    restart: always
-    image: dzemo-demo-redis
-    container_name: dzemo-demo-redis
-    hostname: dzemo-demo-redis
+  ### SFTP #############################################
+  sftp:
+    image: atmoz/sftp
+    container_name: dzemo-demo-sftp
+    hostname: dzemo-demo-sftp
     ports:
-      - "6379:6379"
+      - "2222:22"
     networks:
       - backend
     volumes:
-      - "../data/redis:/data"
-
- ### RabbitMQ #############################################
-  rabbitmq:
-    build: ./rabbitmq
-    restart: always
-    image: dzemo-demo-mq
-    container_name: dzemo-demo-mq
-    hostname: dzemo-demo-mq
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-      - "15671:15671"
-    privileged: true
-    volumes:
-      - ../data/rabbitmq:/var/lib/rabbitmq
-    environment:
-      - RABBITMQ_DEFAULT_USER=guest
-      - RABBITMQ_DEFAULT_PASS=guest
-    networks:
-      - backend
+      - "../data/sftp:/home/lending-and-repayment-service/upload"
+    command: lending-and-repayment-service:12345678:1001
