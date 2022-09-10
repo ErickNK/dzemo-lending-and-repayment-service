@@ -6,6 +6,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,14 +17,15 @@ import java.util.Collection;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class User {
+public class User implements Serializable {
 
-    public User(Long id, String msisdn, String name, String username, String password) {
+    public User(Long id, String msisdn, String name, String username, String password, Long loanLimit) {
         this.id = id;
         this.msisdn = msisdn;
         this.name = name;
         this.username = username;
         this.password = password;
+        this.loanLimit = loanLimit;
     }
 
     @Id
@@ -55,11 +57,6 @@ public class User {
 
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
-    private Loan loan;
-
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
     @ManyToMany(fetch = FetchType.EAGER)
     private Collection<Role> roles = new ArrayList<>();
 
@@ -67,4 +64,13 @@ public class User {
     @EqualsAndHashCode.Exclude
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
     private LoanDefaulter loanDefaulter;
+
+//    @ToString.Exclude
+//    @EqualsAndHashCode.Exclude
+//    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
+    @Transient
+    private Loan loan;
+
 }
+
+

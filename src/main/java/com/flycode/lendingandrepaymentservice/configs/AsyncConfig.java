@@ -5,6 +5,7 @@ import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.AsyncConfigurerSupport;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -15,6 +16,7 @@ import java.util.concurrent.Executor;
 @Configuration
 @EnableAsync
 @Slf4j
+@Profile("!integration-tests")
 public class AsyncConfig extends AsyncConfigurerSupport {
 
     @Autowired

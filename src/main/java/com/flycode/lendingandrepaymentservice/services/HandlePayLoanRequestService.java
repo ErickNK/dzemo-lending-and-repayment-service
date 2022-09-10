@@ -4,7 +4,6 @@ import com.flycode.lendingandrepaymentservice.dtos.RepaymentRequest;
 import com.flycode.lendingandrepaymentservice.dtos.Response;
 import com.flycode.lendingandrepaymentservice.models.Loan;
 import com.flycode.lendingandrepaymentservice.models.User;
-import com.flycode.lendingandrepaymentservice.repositories.LoanDefaulterRepository;
 import com.flycode.lendingandrepaymentservice.repositories.LoanRepository;
 import com.flycode.lendingandrepaymentservice.repositories.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -23,19 +22,15 @@ public class HandlePayLoanRequestService {
     LoanRepository loanRepository;
 
     @Autowired
-    LoanDefaulterRepository loanDefaulterRepository;
-
-    @Autowired
     UserRepository userRepository;
 
     @Async
     public CompletableFuture<Response<Boolean>> execute(RepaymentRequest repaymentRequest, Principal principal) {
         try {
-            User user = userRepository.findByUsernameWithLoan(principal.getName());
-
-            Loan activeLoan = user.getLoan();
+            User user = userRepository.findByUsername(principal.getName());
+            Loan activeLoan = loanRepository.findByUserMsisdn(user.getMsisdn());
             if(activeLoan == null) {
-                CompletableFuture.completedFuture(Response.withBadRequestError("No active loan to repay"));
+                return CompletableFuture.completedFuture(Response.withBadRequestError("No active loan to repay"));
             }
 
             var paymentDiff = activeLoan.getDebt() - repaymentRequest.getAmount();

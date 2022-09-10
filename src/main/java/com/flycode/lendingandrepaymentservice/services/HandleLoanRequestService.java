@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.Principal;
 import java.time.Clock;
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.CompletableFuture;
@@ -25,9 +25,6 @@ import java.util.concurrent.CompletableFuture;
 @Service
 @Slf4j
 public class HandleLoanRequestService {
-
-    @Autowired
-    UserService userService;
 
     @Autowired
     LoanRepository loanRepository;
@@ -48,22 +45,32 @@ public class HandleLoanRequestService {
     public CompletableFuture<Response<Boolean>> execute(LoanRequest loanRequest, Principal principal) {
 
         try {
-            User user = userRepository.findByUsernameWithLoan(principal.getName());
+            User user = userRepository.findByUsername(principal.getName());
 
-            var loanRequestDueDate = OffsetDateTime.parse(loanRequest.getDueDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-            var dayDiff = ChronoUnit.DAYS.between(loanRequestDueDate, OffsetDateTime.now(clock));
+            LoanDefaulter loanDefaulter = loanDefaulterRepository.findByUserId(user.getId());
+            if(loanDefaulter != null){
+                return CompletableFuture.completedFuture(Response.withBadRequestError("Previous loans defaulted. User has to repay previous loans."));
+            }
+
+            var loanRequestDueDate = LocalDate.parse(loanRequest.getDueDate(), DateTimeFormatter.ISO_LOCAL_DATE);
+            var dayDiff = ChronoUnit.DAYS.between(LocalDate.now(clock), loanRequestDueDate);
             if(dayDiff < 1) {
                 return CompletableFuture.completedFuture(Response.withBadRequestError("Invalid due date"));
             }
 
-            Loan activeLoan = user.getLoan();
+            Loan activeLoan = loanRepository.findByUserMsisdn(user.getMsisdn());
             if(activeLoan != null) {
-                return onActiveLoan(loanRequest, user, loanRequestDueDate);
+                return onActiveLoan(loanRequest, user, loanRequestDueDate, activeLoan);
+            }
+
+            // check beyond loan limit
+            if(user.getLoanLimit() - loanRequest.getAmount() < 0) {
+                return CompletableFuture.completedFuture(Response.withBadRequestError("Loan amount beyond user loan limit"));
             }
 
             Loan loan = new Loan();
-            loan.setUser(user);
-            loan.setDueDate(OffsetDateTime.parse(loanRequest.getDueDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+            loan.setUserMsisdn(user.getMsisdn());
+            loan.setDueDate(loanRequestDueDate);
             loan.setDebt(loanRequest.getAmount());
             loanRepository.save(loan);
 
@@ -79,11 +86,9 @@ public class HandleLoanRequestService {
 
     }
 
-    private CompletableFuture<Response<Boolean>> onActiveLoan(LoanRequest loanRequest, User user, OffsetDateTime loanRequestDueDate) {
-        var activeLoan = user.getLoan();
-
+    private CompletableFuture<Response<Boolean>> onActiveLoan(LoanRequest loanRequest, User user, LocalDate loanRequestDueDate, Loan activeLoan) {
         // check for active loans passed due date
-        var monthDiff = ChronoUnit.MONTHS.between(loanRequestDueDate, OffsetDateTime.now(clock));
+        var monthDiff = ChronoUnit.MONTHS.between(LocalDate.now(clock), activeLoan.getDueDate());
         var defaultingTimeInMonths = environment.getRequiredProperty("validation.loans.defaulting-time-in-months", Integer.class);
         if (monthDiff >= defaultingTimeInMonths) { // defaulted
             LoanDefaulter loanDefaulter = new LoanDefaulter();
@@ -98,7 +103,7 @@ public class HandleLoanRequestService {
 
         // check beyond loan limit
         var balance = user.getLoanLimit() - activeLoan.getDebt();
-        if((balance - loanRequest.getAmount()) < 1) {
+        if((balance - loanRequest.getAmount()) < 0) {
             return CompletableFuture.completedFuture(Response.withBadRequestError("Loan amount beyond user loan limit"));
         }
 

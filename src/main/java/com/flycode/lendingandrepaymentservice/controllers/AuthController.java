@@ -64,8 +64,8 @@ public class AuthController {
         userService.saveRole(new Role(null, "ROLE_USER"));
         userService.saveRole(new Role(null, "ROLE_ADMIN"));
 
-        userService.saveUser(new User(null, "25412345678", "John Doe", "john", "1234"));
-        userService.saveUser(new User(null, "25400000000", "Admin", "admin", "1234"));
+        userService.saveUser(new User(null, "25412345678", "John Doe", "john", "1234", 5000L));
+        userService.saveUser(new User(null, "25400000000", "Admin", "admin", "1234", 0L));
 
         userService.addRoleToUser("john", "ROLE_USER");
         userService.addRoleToUser("admin", "ROLE_ADMIN");

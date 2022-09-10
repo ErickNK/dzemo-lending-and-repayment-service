@@ -41,7 +41,7 @@ public class RefreshJWTTokenService {
 
         String access_token = JWT.create()
                 .withSubject(user.getUsername())
-                .withExpiresAt(new Date(System.currentTimeMillis() + environment.getRequiredProperty("security.jwt.access_token.expiry-time", Integer.class)))
+                .withExpiresAt(new Date(System.currentTimeMillis() + (environment.getRequiredProperty("security.jwt.access_token.expiry-time-hrs", Integer.class) * 60 * 60 * 1000)))
                 .withIssuer(environment.getRequiredProperty("security.jwt.issuer"))
                 .withClaim("roles", user.getRoles().stream().map(Role::getName).collect(Collectors.toList()))
                 .sign(algorithm);

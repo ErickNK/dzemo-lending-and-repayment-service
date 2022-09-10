@@ -50,6 +50,9 @@ public class DataDumpingJobConfiguration {
     @Autowired
     SSHClient sshClient;
 
+    @Autowired
+    Clock clock;
+
     private JdbcCursorItemReader<Loan> reader() {
         var sql = "SELECT * FROM loans";
 
@@ -57,7 +60,7 @@ public class DataDumpingJobConfiguration {
                 .dataSource(dataSource)
                 .name("DataDumpingStepReader")
                 .sql(sql)
-                .rowMapper(new LoanMapper())
+                .rowMapper(new LoanMapper(clock))
                 .maxRows(environment.getRequiredProperty("data-dump-job.chunk-size", Integer.class))
                 .fetchSize(environment.getRequiredProperty("data-dump-job.chunk-size", Integer.class))
                 .build();
@@ -72,6 +75,7 @@ public class DataDumpingJobConfiguration {
             // write to csv file
             List<String> stringList = new ArrayList<>();
             CsvMapper mapper = new CsvMapper();
+            mapper.findAndRegisterModules();
             CsvSchema schema = mapper.schemaFor(Loan.class);
 
             for (Loan loan : list) {
@@ -86,10 +90,15 @@ public class DataDumpingJobConfiguration {
                     stringList.add(csv);
                 } catch (JsonProcessingException e) {
                     // TODO: log
+                    throw new RuntimeException(e);
                 }
             }
 
             File csvOutputFile = new File(environment.getRequiredProperty("data-dump-job.local-file-location"));
+            if(!csvOutputFile.exists()){
+                csvOutputFile.createNewFile();
+            }
+
             try(PrintWriter printWriter = new PrintWriter(csvOutputFile)) {
                 stringList.forEach(printWriter::println);
             }

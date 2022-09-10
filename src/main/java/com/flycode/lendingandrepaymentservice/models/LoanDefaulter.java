@@ -17,6 +17,12 @@ import java.time.OffsetDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class LoanDefaulter {
+
+    public LoanDefaulter(Long id, Long debt) {
+        this.id = id;
+        this.debt = debt;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

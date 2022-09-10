@@ -1,0 +1,20 @@
+<configuration>
+
+    <property name="FILE_LOG_PATTERN" value="%d{yy-MM-dd HH:mm:ss.SSS} | Severity=%-5p | %m %n"/>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+            <charset>utf8</charset>
+        </encoder>
+    </appender>
+
+    <logger name="com.flycode.lendingandrepaymentservice" level="info" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <logger name="org.springframework" level="info" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+</configuration>
