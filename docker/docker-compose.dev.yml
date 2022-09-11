@@ -33,4 +33,4 @@ services:
       - backend
     volumes:
       - "../data/sftp:/home/lending-and-repayment-service/upload"
-    command: lending-and-repayment-service:12345678:1001
+    command: lending-and-repayment-service:12345678:1001::upload

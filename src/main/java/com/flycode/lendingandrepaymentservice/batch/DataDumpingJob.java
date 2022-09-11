@@ -1,6 +1,8 @@
 package com.flycode.lendingandrepaymentservice.batch;
 
 import com.flycode.lendingandrepaymentservice.dtos.Response;
+import com.flycode.lendingandrepaymentservice.utils.LogHelper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParametersBuilder;
@@ -15,6 +17,7 @@ import java.util.Date;
 import java.util.concurrent.CompletableFuture;
 
 @Component
+@Slf4j
 public class DataDumpingJob {
 
     @Autowired
@@ -27,7 +30,9 @@ public class DataDumpingJob {
     public CompletableFuture<Response<Boolean>> execute(Principal principal) {
         try {
 
-            // TODO: log
+            LogHelper.builder(log)
+                    .logMsg("Running data dumping job")
+                    .info();
 
             JobExecution execution = jobLauncher.run(
                     sftpDataDumbingJob,
@@ -37,10 +42,16 @@ public class DataDumpingJob {
                             .toJobParameters()
             );
 
-            // TODO: log
+            LogHelper.builder(log)
+                    .logMsg("Data dump job finished")
+                    .logDetailedMsg("Job Status: " + execution.getExitStatus())
+                    .error();
             return CompletableFuture.completedFuture(Response.successResponse(Boolean.TRUE));
         } catch (Exception exception) {
-            // TODO: log
+            LogHelper.builder(log)
+                    .logMsg("Error when fetching elevators")
+                    .logDetailedMsg(exception.getMessage())
+                    .error();
 
             Response<Boolean> response = new Response<>(
                     HttpStatus.INTERNAL_SERVER_ERROR.value(),

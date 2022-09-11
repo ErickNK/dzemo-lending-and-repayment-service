@@ -9,6 +9,7 @@ import com.flycode.lendingandrepaymentservice.models.mappers.LoanMapper;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.Session;
 import net.schmizz.sshj.SSHClient;
+import net.schmizz.sshj.sftp.OpenMode;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -29,13 +30,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.ResourceUtils;
 
 import javax.sql.DataSource;
 import java.io.File;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Configuration
 @EnableBatchProcessing
@@ -94,9 +100,9 @@ public class DataDumpingJobConfiguration {
                 }
             }
 
-            File csvOutputFile = new File(environment.getRequiredProperty("data-dump-job.local-file-location"));
+            File csvOutputFile = ResourceUtils.getFile(environment.getRequiredProperty("data-dump-job.local-file-location"));
             if(!csvOutputFile.exists()){
-                csvOutputFile.createNewFile();
+                throw new RuntimeException("Could not get data dump file");
             }
 
             try(PrintWriter printWriter = new PrintWriter(csvOutputFile)) {
@@ -108,21 +114,23 @@ public class DataDumpingJobConfiguration {
     private Tasklet uploadingTask() {
         return (stepContribution, chunkContext) -> {
 
-            File csvOutputFile = new File(environment.getRequiredProperty("data-dump-job.local-file-location"));
+            File csvOutputFile = ResourceUtils.getFile(environment.getRequiredProperty("data-dump-job.local-file-location"));
             if(!csvOutputFile.exists()){
                 return RepeatStatus.FINISHED;
             }
 
             // upload to sftp server
             var sftpClient = sshClient.newSFTPClient();
-//            channelSftp.connect();
+            sftpClient.open(
+                    environment.getRequiredProperty("data-dump-job.remote-file-location") + "loans-dump.csv",
+                    Set.of(OpenMode.CREAT)
+            );
             sftpClient.put(
-                    environment.getRequiredProperty("data-dump-job.local-file-location"),
-                    environment.getRequiredProperty("data-dump-job.remove-file-location")
+                    csvOutputFile.getAbsolutePath(),
+                    environment.getRequiredProperty("data-dump-job.remote-file-location") + "loans-dump.csv"
             );
 
             sftpClient.close();
-            sshClient.disconnect();
             return RepeatStatus.FINISHED;
         };
     }
