@@ -32,7 +32,6 @@ public class MainController {
     @Operation(
             summary = "Request for a loan.",
             security = {@SecurityRequirement(name = "bearer-key")}
-
     )
     @PostMapping("/request-loan")
     public CompletableFuture<Response<Boolean>> getLoanRequest(
