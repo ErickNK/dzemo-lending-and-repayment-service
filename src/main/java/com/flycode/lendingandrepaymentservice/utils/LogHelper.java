@@ -6,6 +6,9 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
 
 
+/**
+ * Simple helper class for creating logs with a standard structure.
+ */
 public class LogHelper {
     @Accessors(fluent = true)
     public static class LogBuilder {

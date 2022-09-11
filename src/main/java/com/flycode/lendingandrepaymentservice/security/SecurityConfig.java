@@ -42,9 +42,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                .antMatchers("/actuator/**", "/api/auth/populate-records").permitAll()
+                .antMatchers("/actuator/**", "/api/auth/populate-records", "/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll()
                 .antMatchers(POST, "/api/auth/login/**", "/api/auth/token/refresh").permitAll()
-                .antMatchers(POST, "/api/auth/register", "/api/auth/role", "/api/auth/user/role", "/api/loans/data-dump").hasAnyAuthority("ROLE_ADMIN")
+                .antMatchers(POST, "/api/auth/register", "/api/auth/role", "/api/auth/user/role", "/api/auth/users", "/api/loans/data-dump").hasAnyAuthority("ROLE_ADMIN")
                 .antMatchers(POST, "/api/loans/request-loan", "/api/loans/pay-loan").hasAnyAuthority("ROLE_USER")
                 .anyRequest().authenticated();
 

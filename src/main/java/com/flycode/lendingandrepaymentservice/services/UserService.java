@@ -33,6 +33,14 @@ public class UserService implements UserDetailsService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    /**
+     * Fetch user with username and create a UserDetail object with the information. Used by spring security to load
+     * the logged-in user into the SecurityContext.
+     *
+     * @param username String user's username
+     * @return UserDetails object
+     * @throws UsernameNotFoundException
+     */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username);
@@ -47,25 +55,54 @@ public class UserService implements UserDetailsService {
         }
     }
 
+    /**
+     * Encode password of user and persist user model to db.
+     *
+     * @param user User to persist
+     * @return User to persist
+     */
     public User saveUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
 
+    /**
+     * Persist role model to db.
+     *
+     * @param role Role to persist
+     * @return Persisted Role
+     */
     public Role saveRole(Role role) {
         return roleRepository.save(role);
     }
 
+    /**
+     * Assign Role to user.
+     *
+     * @param username username of User.
+     * @param roleName role name of Role.
+     */
     public void addRoleToUser(String username, String roleName) {
         User user = userRepository.findByUsername(username);
         Role role = roleRepository.findByName(roleName);
         user.getRoles().add(role);
     }
 
+    /**
+     * Fetch user by username
+     *
+     * @param username username of User.
+     * @return User
+     */
     public User getUser(String username) {
         return userRepository.findByUsername(username);
     }
 
+    /**
+     * Fetch all users in db.
+     *
+     * @return List of User
+     */
     public List<User> getUsers() {
         return userRepository.findAll();
     }

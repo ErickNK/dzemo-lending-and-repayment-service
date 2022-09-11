@@ -41,6 +41,14 @@ public class HandleLoanRequestService {
     @Autowired
     Clock clock;
 
+    /**
+     * Handle a LoanRequest api call. The function check multiple creteria before creating a new loan
+     * linked to the user or update an existing loan with new debt.
+     *
+     * @param loanRequest request data.
+     * @param principal logged in user
+     * @return Response with true value if loan created or updated successfully. Otherwise, Response with error message.
+     */
     @Async
     public CompletableFuture<Response<Boolean>> execute(LoanRequest loanRequest, Principal principal) {
 
@@ -86,6 +94,15 @@ public class HandleLoanRequestService {
 
     }
 
+    /**
+     * When an existing loan is found do checks before updating loan with new debt.
+     *
+     * @param loanRequest request data.
+     * @param user User to update loan for.
+     * @param loanRequestDueDate LocalDate of loan due date.
+     * @param activeLoan Loan fetched as active loan of user.
+     * @return Response with true value if loan was updated successfully. Otherwise, Response with error message.
+     */
     private CompletableFuture<Response<Boolean>> onActiveLoan(LoanRequest loanRequest, User user, LocalDate loanRequestDueDate, Loan activeLoan) {
         // check for active loans passed due date
         var monthDiff = ChronoUnit.MONTHS.between(LocalDate.now(clock), activeLoan.getDueDate());

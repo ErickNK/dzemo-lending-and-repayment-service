@@ -24,6 +24,14 @@ public class HandlePayLoanRequestService {
     @Autowired
     UserRepository userRepository;
 
+    /**
+     * Handle a /pay-loan api call. The function check multiple creteria updating clearing old loan if fully paid
+     * or updating new debt of old loan if partially paid. A sms is then sent to customer upon action of loan update.
+     *
+     * @param repaymentRequest request data of api call.
+     * @param principal logged in user.
+     * @return Response with true value if loan updated or deleted successfully. Otherwise, Response with error message.
+     */
     @Async
     public CompletableFuture<Response<Boolean>> execute(RepaymentRequest repaymentRequest, Principal principal) {
         try {

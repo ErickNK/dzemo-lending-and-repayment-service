@@ -28,6 +28,12 @@ public class RefreshJWTTokenService {
     @Autowired
     UserRepository userRepository;
 
+    /**
+     * Generate new access token for user.
+     *
+     * @param authorizationHeader header string from the api request contain authorization info "Bearer ..."
+     * @return Map of new generated access_token and previous refresh_token.
+     */
     public Response<Map<String, String>> execute(String authorizationHeader) {
         String refresh_token = authorizationHeader.substring("Bearer ".length());
 
