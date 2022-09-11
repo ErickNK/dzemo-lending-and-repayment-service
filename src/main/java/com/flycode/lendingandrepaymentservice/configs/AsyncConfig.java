@@ -1,5 +1,6 @@
 package com.flycode.lendingandrepaymentservice.configs;
 
+import com.flycode.lendingandrepaymentservice.utils.LogHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +39,10 @@ public class AsyncConfig extends AsyncConfigurerSupport {
     @Override
     public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
         return (throwable, method, objects) -> {
-            // TODO: log
+            LogHelper.builder(log)
+                    .logMsg("Error on thread execution.")
+                    .logMsg(throwable.getMessage())
+                    .error();
         };
     }
 }
